@@ -1,6 +1,10 @@
-import { Controller, Get, Post, Res } from '@nestjs/common';
+import { Controller, Get, Post, Res, Req } from '@nestjs/common';
 import { AppService } from './app.service';
-//import * as admin from 'firebase-admin';
+import * as admin from 'firebase-admin';
+import firebase from 'firebase/app';
+import 'firebase/auth';
+
+firebase.initializeApp(process.env.FIREBASE_PRIVATE_KEY);
 
 /*
 admin.initializeApp({
@@ -30,9 +34,10 @@ export class AppController {
   }
 
   @Get('login')
-  getHello(): string {
+  login(): string {
     //return this.appService.getHello();
-    return 'user login page';
+    //return 'user login page';
+    
   }
   @Get('profile')
   getHelloWorld(): string {
@@ -40,8 +45,29 @@ export class AppController {
     return 'profile page';
   }
   @Post('login')
-  checkLogin(@Res() res): string {
-    return 'user auth';
+  sessionLogin(@Req() req, @Res() res): string {
+    //return 'user auth';
+    const idToken = req.body.idToken.toString();
+    const csrfToken = req.body.csrfToken.toString();
+    if (csrfToken !== req.cookies.csrfToken) {
+      res.status(401).send("UNAUTHORIZED REQUEST");
+      return;
+    }
+    const expiresIn = 60*60*24*5*1000;
+
+    //create session cookie file
+    admin
+      .auth()
+      .createSessionCookie(idToken,{ expiresIn })
+      .then(
+        (sessionCookie) => {
+          res.cookie('session',sessionCookie)
+          res.end(JSON.stringify({status:'success'}))
+        },
+        (error) => {
+          res.status(401).send('UNAUTHORIZED REQUEST')
+        }
+      );
   }
   @Post('signup')
   getLog(): string {

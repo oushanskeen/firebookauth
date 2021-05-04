@@ -1,9 +1,11 @@
 import { NestFactory } from '@nestjs/core';
+import firebase from "firebase/app";
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import * as admin from 'firebase-admin';
 //import { ServiceAccount } from 'firebase-admin';
+import "firebase/auth";
 
 //const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
@@ -43,6 +45,7 @@ async function bootstrap() {
   app.setViewEngine('pug');
 
   // get all users
+  /*
   admin
     .auth()
     .listUsers()
@@ -92,6 +95,8 @@ async function bootstrap() {
     .catch(error => {
       console.log('Error updateing user: ${error}');
     });
+  
+    
 
   admin
     .auth()
@@ -102,6 +107,7 @@ async function bootstrap() {
     .catch(error => {
       console.log(`Error deleting user, ${error}`);
     });
+  */
 
   await app.listen(configService.get<string>('API_PORT') || 4000);
 }
